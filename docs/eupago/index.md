@@ -19,5 +19,12 @@ Both stay *pending* in pretix until euPago confirms the payment through a [webho
 pip install pretix-eupago
 ```
 
-Restart pretix and enable **euPago** under the event's **Settings → Plugins**. Then
+Restart pretix and enable **euPago Payments** under the event's **Settings → Plugins**. Then
 [configure it](configuration.md).
+
+## The euPago orders page
+
+The plugin adds a **euPago orders** entry to the event's sidebar: every euPago payment for the event,
+filterable by method (Multibanco / MB WAY) and status, with the Multibanco reference or MB WAY phone
+number of each. Use it to check what a buyer was given, or which payments are still waiting on
+euPago.
