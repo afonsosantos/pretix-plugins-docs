@@ -1,0 +1,47 @@
+site_name: pretix plugins
+site_description: Portuguese payment and invoicing plugins for pretix
+site_author: Afonso Santos
+site_url: https://afonsosantos.github.io/pretix-plugins-docs/
+repo_url: https://github.com/afonsosantos/pretix-plugins-docs
+copyright: Copyright &copy; 2026 Afonso Santos — Apache License 2.0
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - content.code.copy
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle: {icon: material/brightness-7, name: Dark mode}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle: {icon: material/brightness-4, name: Light mode}
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - euPago:
+      - eupago/index.md
+      - Configuration: eupago/configuration.md
+      - Webhooks & refunds: eupago/webhooks.md
+  - PT invoicing:
+      - pt-invoicing/index.md
+      - Configuration: pt-invoicing/configuration.md
+      - Providers:
+          - Fact.pt: pt-invoicing/factpt.md
+          - Moloni: pt-invoicing/moloni.md
+          - Writing a provider: pt-invoicing/providers.md
+      - Issuing & credit notes: pt-invoicing/usage.md
+      - Known limitations: pt-invoicing/limitations.md
+  - Development: development.md
