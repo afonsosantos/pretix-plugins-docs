@@ -1,7 +1,7 @@
 site_name: pretix plugins
 site_description: Portuguese payment and invoicing plugins for pretix
 site_author: Afonso Santos
-site_url: https://afonsosantos.github.io/pretix-plugins-docs/
+site_url: https://docs.afonsosantos.me/
 repo_url: https://github.com/afonsosantos/pretix-plugins-docs
 copyright: Copyright &copy; 2026 Afonso Santos — Apache License 2.0
 
