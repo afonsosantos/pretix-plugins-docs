@@ -48,6 +48,10 @@ Cada documento leva um `identifierId` (`pretix-<evento>-<código da encomenda>`)
 um segundo documento com o mesmo. Por isso, carregar em "Tentar novamente" depois de uma falha
 ambígua nunca emite duas vezes.
 
+Uma encomenda [paga de novo depois de um reembolso](usage.md#paga-de-novo-depois-de-um-reembolso)
+recebe um novo por cada nova fatura (`…-r1`, `…-r2`), e cada nota de crédito usa o da sua fatura
+seguido de `-credit`.
+
 ## Notas de crédito
 
 Emitidas com o endpoint de crédito do Fact.pt, creditando o documento original na totalidade. O

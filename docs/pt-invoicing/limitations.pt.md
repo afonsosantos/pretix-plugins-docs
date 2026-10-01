@@ -2,7 +2,11 @@
 
 **Uma taxa de IVA por evento.**
 Todas as linhas são faturadas à taxa configurada. Um evento que venda artigos a taxas diferentes
-falha a emissão (de forma visível) em vez de faturar mal. Ainda não existe um mapeamento por taxa.
+falha a emissão (de forma visível) em vez de faturar mal. Ainda não existe um mapeamento por taxa. O
+Moloni aceita também linhas a 0%, que fatura com o motivo de isenção.
+
+**Categorias de artigos do Moloni: só as de topo.**
+A lista **Categoria de artigos** mostra só as categorias de topo do Moloni.
 
 **Reembolsos parciais não têm nota de crédito.**
 Os dois fornecedores só conseguem creditar o valor total de um documento. Um reembolso parcial não

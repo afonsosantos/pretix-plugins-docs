@@ -90,6 +90,19 @@ environment**.
 Check the developer ID, client secret, username and password. They're checked live when you fill
 them in: errors show under the Moloni settings.
 
+**`Not connected to Moloni, or the connection has expired.`**
+The Moloni connection is missing or expired, and no username/password is set to fall back on. Press
+**Connect to Moloni** (or **Reconnect**) in the settings, then retry. The plugin refreshes the
+connection daily, so this usually means Moloni revoked it. See
+[Connecting to Moloni](pt-invoicing/moloni.md#connecting-to-moloni).
+
+**`VAT mismatch: pretix charged X% on this order but the configured Moloni rate is Y%`**
+Same as for Fact.pt: fix the event's tax rule, or pick the matching **VAT rate**. Nothing was created
+in Moloni. See [Taxes](pt-invoicing/moloni.md#taxes).
+
+**`This order has 0% VAT lines, which Moloni only accepts with an exemption reason.`**
+Set an **Exemption reason** (e.g. `M07`) in the Moloni settings, then retry.
+
 **The VAT rate / company / document set dropdowns don't appear.**
 They're filled from your provider account once the credentials are valid. If they stay plain number
 fields, the line under the provider's settings shows why (bad token, provider unreachable).

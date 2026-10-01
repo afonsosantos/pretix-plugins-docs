@@ -2,7 +2,11 @@
 
 **One VAT rate per event.**
 Every line is invoiced at the single configured rate. An event selling items at different rates fails
-issuance (visibly) rather than mis-invoicing. A per-rate mapping is not implemented yet.
+issuance (visibly) rather than mis-invoicing. A per-rate mapping is not implemented yet. Moloni can mix
+in 0% lines, which it invoices with the exemption reason instead.
+
+**Moloni product categories: top level only.**
+The **Product category** dropdown lists only Moloni's top-level categories.
 
 **Partial refunds have no credit note.**
 Both providers can only credit a document's full value. A partial refund issues nothing until refunds

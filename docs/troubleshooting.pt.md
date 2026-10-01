@@ -94,6 +94,19 @@ testes (sandbox)**.
 Confirme o ID de programador, o segredo do cliente, o utilizador e a palavra-passe. São verificados
 em direto quando os preenche: os erros aparecem por baixo das definições do Moloni.
 
+**`Sem ligação ao Moloni, ou a ligação expirou.`**
+A ligação ao Moloni não existe ou expirou, e não há utilizador/palavra-passe definidos como
+alternativa. Carregue em **Ligar ao Moloni** (ou **Voltar a ligar**) nas definições e tente
+novamente. O plugin renova a ligação todos os dias, por isso isto costuma significar que o Moloni a
+revogou. Veja [Ligar ao Moloni](pt-invoicing/moloni.md#ligar-ao-moloni).
+
+**`Divergência de IVA: o pretix cobrou X% nesta encomenda mas a taxa configurada no Moloni é Y%`**
+Tal como no Fact.pt: corrija a regra fiscal do evento, ou escolha a **taxa de IVA** correspondente.
+Nada foi criado no Moloni. Veja [IVA](pt-invoicing/moloni.md#iva).
+
+**`Esta encomenda tem linhas com IVA a 0%, que o Moloni só aceita com um motivo de isenção.`**
+Defina um **Motivo de isenção** (por exemplo `M07`) nas definições do Moloni e tente novamente.
+
 **As listas de taxa de IVA / empresa / série de documentos não aparecem.**
 São preenchidas a partir da sua conta no fornecedor quando as credenciais são válidas. Se ficarem
 como campos numéricos, a linha por baixo das definições do fornecedor diz porquê (token errado,

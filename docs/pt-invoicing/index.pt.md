@@ -17,7 +17,7 @@ Cada evento usa um fornecedor.
 | Fornecedor | Identificador | Estado |
 |---|---|---|
 | [Fact.pt](factpt.md) | `factpt` | Verificado com uma conta sandbox real |
-| [Moloni](moloni.md) | `moloni` | Feito a partir da documentação pública da API e do código do plugin oficial do Moloni; **ainda não testado com uma conta real** |
+| [Moloni](moloni.md) | `moloni` | Verificado com uma conta real (faturas-recibo, notas de crédito, PDF) |
 
 !!! warning "Antes de usar em produção"
     Emita alguns documentos de teste na sandbox do fornecedor e confirme os valores, o cliente e o
@@ -34,7 +34,9 @@ Cada evento usa um fornecedor.
    página da encomenda.
 
 A emissão é idempotente: cada encomenda tem um identificador estável, e uma emissão bem-sucedida
-nunca é repetida.
+nunca é repetida. Uma encomenda paga de novo depois de a fatura ter sido creditada (um reembolso,
+seguido de um novo pagamento) recebe uma nova fatura — ver
+[Paga de novo depois de um reembolso](usage.md#paga-de-novo-depois-de-um-reembolso).
 
 ## Instalação
 

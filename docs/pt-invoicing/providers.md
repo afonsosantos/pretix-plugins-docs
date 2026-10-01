@@ -8,7 +8,8 @@ Providers are discovered automatically: write a package under
 pretix_ptinvoicing/providers/acme/
 ├── __init__.py   # settings form + provider class
 ├── client.py     # thin HTTP wrapper
-└── payload.py    # pretix Order → request body (pure functions)
+├── payload.py    # pretix Order → request body (pure functions)
+└── urls.py       # optional: the provider's own views (e.g. an OAuth callback)
 ```
 
 ## The contract
@@ -21,10 +22,45 @@ pretix_ptinvoicing/providers/acme/
 | `is_configured` | `False` while not set up; issuance then skips silently. |
 | `issue(order, identifier_id)` | Issue the invoice-receipt; return an `IssuedDocument`. |
 | `credit(order, document_id, identifier_id)` | Issue a credit note for the full document. |
-| `download(document_id)` | Return the PDF bytes. |
+| `download(document_id)` | Return the PDF bytes. Make sure they *are* a PDF — some APIs link to an HTML download page. |
 | `lookups(data)` | Optional. Live dropdowns for the settings page. |
+| `document_number(document_id)` | Optional. The number people read (e.g. `FR M2026/20`), built only from what the API returns. Called right after issuance, so it must **never raise**: return `None` on failure. |
+| `logo` | Optional. Static path of the logo on the settings page's provider card; without one the card shows `verbose_name`. |
+| `lookup_triggers` | Optional. `lookups()` fields whose value changes what `lookups()` returns (Moloni's company). Changing one re-runs the lookup. |
+| `settings_template` | Optional. A template rendered at the top of the provider's settings, with the provider as `provider` — for what isn't a form field (Moloni's connect button). |
+| `hidden_settings_fields()` | Optional. Settings fields to leave off the page right now. They're dropped from the form, so saving keeps their stored values. |
+| `keepalive()` | Optional. Called about once a day for every event using the provider, e.g. to refresh an expiring token. Return `True` if the connection is dead, and the event's contact address is e-mailed to reconnect. |
 
 `self.event` is the event and `self.settings` its settings store (writable).
+
+`IssuedDocument` has `document_id`, `link`, `permanent_url` and `number`. A provider that fills
+`number` itself can skip `document_number()`; the bundled ones call it from `issue()` and `credit()`.
+
+The `identifier_id` the core passes is stable per document: a retry gets the same one. An order paid
+again after a credited refund gets a new invoice, and with it a new `identifier_id` (`…-r1`, …), so
+pass it through to the API's dedup field unchanged.
+
+## Provider URLs
+
+A provider that needs its own views (an OAuth callback, a connect button) lists them in
+`providers/<name>/urls.py`. The core adds every provider's `urlpatterns` to the plugin's, so names
+reverse as `plugins:pretix_ptinvoicing:<name>` and the core never names a provider. Prefix URL names
+with the provider's identifier (`acme_connect`), since they share one namespace. Use the full
+Control-panel path, as the core does:
+
+```python title="providers/acme/urls.py"
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path(
+        "control/event/<str:organizer>/<str:event>/invoicing/settings/acme/connect/",
+        views.ConnectView.as_view(),
+        name="acme_connect",
+    ),
+]
+```
 
 ## A minimal provider
 

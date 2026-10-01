@@ -7,7 +7,7 @@ Abra **Configurações → Faturação PT** do evento. (Chama-se "PT" para se di
 
 | Definição | Por omissão | Descrição |
 |---|---|---|
-| **Fornecedor de faturação** | nenhum | Que fornecedor emite os documentos. Sem nenhum, nada é emitido. Só as definições do fornecedor selecionado são guardadas. |
+| **Fornecedor de faturação** | nenhum | Escolha o cartão de um fornecedor (Fact.pt, Moloni) ou **Sem faturação**. Sem nenhum, nada é emitido. Só as definições do fornecedor selecionado são guardadas. |
 | **O campo personalizado da morada de faturação contém o NIF do comprador** | desligado | Veja [NIF](#nif). |
 | **Mostrar a fatura na página da encomenda do comprador** | ligado | Acrescenta um botão de descarga junto às descargas dos bilhetes. O PDF passa pelo pretix, por isso as credenciais do fornecedor nunca chegam ao browser. |
 
@@ -33,7 +33,12 @@ Abaixo das definições gerais, preencha os campos do fornecedor selecionado:
 
 Alguns campos (taxa de IVA, empresa, série de documentos…) passam a listas preenchidas em direto a
 partir da sua conta no fornecedor, assim que as credenciais são válidas — não é preciso guardar
-primeiro.
+primeiro. Os campos que dependem de outro (as definições de cada empresa no Moloni) voltam a carregar
+quando esse muda.
+
+Os campos das definições indicam aos browsers e gestores de palavras-passe (Bitwarden, 1Password,
+LastPass, Dashlane) que não os preencham automaticamente, para que o seu login do pretix nunca acabe
+nas credenciais de um fornecedor.
 
 ## NIF
 

@@ -16,7 +16,7 @@ One provider is active per event.
 | Provider | Identifier | Status |
 |---|---|---|
 | [Fact.pt](factpt.md) | `factpt` | Verified against a real sandbox account |
-| [Moloni](moloni.md) | `moloni` | Built from the published API docs and the official Moloni plugin's source; **not yet run against a real account** |
+| [Moloni](moloni.md) | `moloni` | Verified against a real account (invoice-receipts, credit notes, PDFs) |
 
 !!! warning "Before production"
     Issue a few test documents in your provider's sandbox and check the amounts, client and tax
@@ -32,7 +32,8 @@ One provider is active per event.
 4. Optionally, the PDF is e-mailed to the buyer and offered for download on their order page.
 
 Issuance is idempotent: each order has a stable identifier, and a successful issuance is never
-repeated.
+repeated. An order paid again after its invoice was credited (a refund, then a new payment) gets a
+new invoice — see [Paid again after a refund](usage.md#paid-again-after-a-refund).
 
 ## Installation
 

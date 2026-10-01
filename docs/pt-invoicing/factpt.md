@@ -46,6 +46,9 @@ address data.
 Each document carries an `identifierId` (`pretix-<event>-<order code>`), and Fact.pt rejects a second
 document with the same one, so pressing Retry after an ambiguous failure can never issue twice.
 
+An order [paid again after a refund](usage.md#paid-again-after-a-refund) gets a new one per new
+invoice (`…-r1`, `…-r2`), and each credit note uses its invoice's plus `-credit`.
+
 ## Credit notes
 
 Issued with Fact.pt's credit endpoint, crediting the original document in full. Fact.pt allows exactly
