@@ -14,32 +14,56 @@ Payments are only confirmed by euPago's webhook. Check that:
 - the webhook URL `https://<your-pretix-domain>/eupago/webhook/` is set in euPago's Backoffice for
   **every** channel you use ([Webhooks](eupago/webhooks.md));
 - your pretix instance is reachable from the internet at that address;
+- the **Webhook key** is set under **Settings → euPago** — without it, v2.0 payment notifications
+  are refused;
 - the pretix log shows `euPago webhook` lines when a payment is made — if there are none, euPago isn't
   reaching you.
 
-**The webhook answers `invalid credentials`.**
-A v1.0 notification carried an API key that doesn't match the one configured in pretix. Copy the API
-key for that channel again from Backoffice → Channels → Channel Listing.
+**The webhook answers `webhook key not configured`.**
+A v2.0 payment or refund notification arrived for an event with no **Webhook key** set. Copy the
+channel's webhook key from Backoffice into **Settings → euPago**. euPago retries failed notifications
+for a while, so recent payments usually confirm by themselves once it's set; confirm older ones by
+hand.
+
+**A v1.0 notification is ignored (`chave_api mismatch` in the log).**
+The notification carried an API key that doesn't match the one configured in pretix. Copy the API key
+for that channel again from Backoffice → Channels → Channel Listing.
 
 **The webhook answers `invalid signature`.**
-A v2.0 notification's signature doesn't match the **Webhook signature secret**. Copy the secret again
-from the channel's webhook settings in Backoffice.
+A v2.0 notification's signature doesn't match the **Webhook key**. Copy the key again from the
+channel's webhook settings in Backoffice.
+
+**The webhook answers `invalid credentials` (encrypted webhooks).**
+The notification was encrypted with another event's webhook key, not the key of the event the payment
+belongs to. Check each event has its own channel's key.
 
 **Notifications arrive, but nothing happens (encrypted webhooks).**
 With euPago's "encrypt" option turned on, the pretix log shows
 `could not decrypt payload with any configured webhook secret`. The notification is acknowledged but
-ignored, so euPago won't resend it. Set the channel's secret as the **Webhook signature secret** in
-pretix, then confirm the affected payments by hand.
+ignored, so euPago won't resend it. Set the channel's key as the **Webhook key** in pretix, then
+confirm the affected payments by hand.
+
+**Multibanco and MB WAY aren't offered at checkout.**
+They're hidden when the event's currency isn't the euro, or when **Sandbox mode** is on but the event
+isn't in test mode. The **Settings → euPago** page shows a warning for either case.
 
 **Checkout says "Could not reach the payment provider" or "The payment provider returned an error".**
-The request to euPago failed. Usually a wrong API key, or **Sandbox / Test mode** not matching the
-key: sandbox and production keys are different.
+The request to euPago failed. Usually a wrong API key, or **Sandbox mode** not matching the key:
+sandbox and production keys are different.
+
+**Checkout says "We couldn't send the MB WAY request to this number".**
+euPago refused the MB WAY request — usually the number isn't registered with MB WAY. The buyer can
+try another number or payment method. The euPago response is in the pretix log.
 
 **"euPago sandbox mode is active" is shown at checkout.**
-Turn off **Sandbox / Test mode** before selling for real — no real payment is taken in sandbox.
+Turn off **Sandbox mode** before selling for real — no real payment is taken in sandbox.
 
 **The buyer didn't approve MB WAY in time.**
-The request expires after 5 minutes. The buyer can retry the payment from their order page.
+The request expires after 5 minutes. The buyer can pay again from their order page.
+
+**A payment was made, but the order is still expired (`quota is exceeded` in the log).**
+The buyer paid after the order expired and its tickets were sold. The payment is recorded on the
+order; refund it or free up a ticket by hand.
 
 **A refund made in euPago doesn't show up in pretix.**
 It's recorded when euPago sends a `Refund` notification — check the webhook is working. Refunds

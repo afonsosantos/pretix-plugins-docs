@@ -14,34 +14,58 @@ Os pagamentos só são confirmados pelo webhook da euPago. Confirme que:
 - o URL do webhook `https://<o-seu-domínio-pretix>/eupago/webhook/` está definido no Backoffice da
   euPago para **todos** os canais que usa ([Webhooks](eupago/webhooks.md));
 - a sua instância do pretix está acessível a partir da internet nesse endereço;
+- a **Chave do webhook** está definida em **Configurações → euPago** — sem ela, as notificações de
+  pagamento v2.0 são recusadas;
 - o log do pretix mostra linhas `euPago webhook` quando é feito um pagamento — se não houver
   nenhuma, a euPago não está a chegar até si.
 
-**O webhook responde `invalid credentials`.**
-Uma notificação v1.0 trouxe uma chave API diferente da configurada no pretix. Copie de novo a chave
-API desse canal em Backoffice → Canais → Listagem de Canais.
+**O webhook responde `webhook key not configured`.**
+Chegou uma notificação v2.0 de pagamento ou reembolso para um evento sem **Chave do webhook**. Copie a
+chave do webhook do canal no Backoffice para **Configurações → euPago**. A euPago volta a tentar as
+notificações falhadas durante algum tempo, por isso os pagamentos recentes costumam confirmar-se
+sozinhos depois de a definir; confirme os mais antigos à mão.
+
+**Uma notificação v1.0 é ignorada (`chave_api mismatch` no log).**
+A notificação trouxe uma chave API diferente da configurada no pretix. Copie de novo a chave API desse
+canal em Backoffice → Canais → Listagem de Canais.
 
 **O webhook responde `invalid signature`.**
-A assinatura de uma notificação v2.0 não corresponde ao **Segredo de assinatura do webhook**. Copie
-de novo o segredo nas definições de webhook do canal no Backoffice.
+A assinatura de uma notificação v2.0 não corresponde à **Chave do webhook**. Copie de novo a chave
+nas definições de webhook do canal no Backoffice.
+
+**O webhook responde `invalid credentials` (webhooks encriptados).**
+A notificação foi encriptada com a chave do webhook de outro evento, e não com a do evento a que o
+pagamento pertence. Confirme que cada evento tem a chave do seu próprio canal.
 
 **As notificações chegam, mas nada acontece (webhooks encriptados).**
 Com a opção "encriptar" da euPago ligada, o log do pretix mostra
 `could not decrypt payload with any configured webhook secret`. A notificação é aceite mas ignorada,
-por isso a euPago não a volta a enviar. Defina o segredo do canal como **Segredo de assinatura do
-webhook** no pretix e confirme à mão os pagamentos afetados.
+por isso a euPago não a volta a enviar. Defina a chave do canal como **Chave do webhook** no pretix e
+confirme à mão os pagamentos afetados.
+
+**O Multibanco e o MB WAY não aparecem no checkout.**
+Ficam ocultos quando a moeda do evento não é o euro, ou quando o **Modo de sandbox** está ativo mas o
+evento não está em modo de teste. A página **Configurações → euPago** mostra um aviso em ambos os
+casos.
 
 **O checkout diz "Não foi possível contactar o fornecedor de pagamentos" ou "O fornecedor de pagamentos devolveu um erro".**
-O pedido à euPago falhou. Normalmente é uma chave API errada, ou **Sandbox / Modo de teste** não
-corresponde à chave: as chaves de sandbox e de produção são diferentes.
+O pedido à euPago falhou. Normalmente é uma chave API errada, ou o **Modo de sandbox** não corresponde
+à chave: as chaves de sandbox e de produção são diferentes.
+
+**O checkout diz "Não foi possível enviar o pedido MB WAY para este número".**
+A euPago recusou o pedido MB WAY — normalmente o número não está registado no MB WAY. O comprador pode
+tentar outro número ou método de pagamento. A resposta da euPago fica no log do pretix.
 
 **Aparece "O modo de sandbox da euPago está ativo" no checkout.**
-Desligue **Sandbox / Modo de teste** antes de vender a sério — em sandbox não é cobrado nenhum
-pagamento real.
+Desligue o **Modo de sandbox** antes de vender a sério — em sandbox não é cobrado nenhum pagamento
+real.
 
 **O comprador não aprovou o MB WAY a tempo.**
-O pedido expira ao fim de 5 minutos. O comprador pode voltar a tentar o pagamento na página da
-encomenda.
+O pedido expira ao fim de 5 minutos. O comprador pode pagar novamente na página da encomenda.
+
+**Foi feito um pagamento, mas o pedido continua expirado (`quota is exceeded` no log).**
+O comprador pagou depois de o pedido expirar e de os bilhetes terem sido vendidos. O pagamento fica
+registado no pedido; reembolse-o ou liberte um bilhete à mão.
 
 **Um reembolso feito na euPago não aparece no pretix.**
 É registado quando a euPago envia uma notificação `Refund` — confirme que o webhook está a funcionar.
