@@ -5,10 +5,6 @@
 Issuing invoice-receipts and credit notes, and downloading their PDFs, has been verified against a
 real Moloni account.
 
-!!! warning "Check one taxed document first"
-    Lines are sent **net**, and Moloni adds the configured VAT rate on top. The real-account tests used
-    0% lines, so issue one test document with a taxed ticket and check its total before a live event.
-
 ## Connecting to Moloni
 
 At the top of the Moloni settings, **Connect to Moloni** sends you to Moloni to authorize the plugin,
