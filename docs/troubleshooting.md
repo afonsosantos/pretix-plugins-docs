@@ -77,17 +77,33 @@ the provider's message. Once the cause is fixed, press **Retry**.
 **A paid order has no invoice, and no row in the dashboard.**
 Issuance is skipped silently when:
 
-- no **Invoicing provider** is selected;
-- the selected provider isn't set up: Fact.pt has no API token, or any required Moloni setting is
-  empty;
+- no **Invoicing provider** is selected, or the provider card was picked but never **saved** (the
+  settings page then shows *Not in use yet*);
+- **Issue documents automatically** is off;
 - the plugin isn't enabled for the event, or the order isn't paid.
 
 Fix the settings, then use **Issue invoice now** on the order page. Orders paid before the plugin was
-set up need this too.
+set up need this too; for many of them, see [Bulk issuance](pt-invoicing/usage.md#bulk-issuance).
+
+**`Not issued: Fact.pt is not fully configured, or its connection has expired.`**
+The provider is selected but can't issue: Fact.pt has no API token, a required Moloni setting is
+empty, or the Moloni connection expired. The row is kept so the order isn't forgotten. Fix the
+settings, then press **Retry**.
 
 **A row stays in "Processing".**
-The task was queued but never ran — pretix's Celery workers aren't running, or aren't picking up
-tasks. Check them, then press **Retry**.
+The task was queued but never ran: pretix's Celery workers aren't running, or aren't picking up
+tasks. Check them. After ten minutes the row is no longer considered in progress and **Retry**
+appears.
+
+**`… — retrying automatically in a few minutes` / `… — gave up after several attempts`**
+A network failure with Fact.pt. The first message means the task will try again by itself (three
+times, a couple of minutes apart); the second that every retry failed. Press **Retry** once Fact.pt
+is reachable. Fact.pt rejects duplicates, so retrying never issues twice.
+
+**`… — the document may or may not have been created. Check in Moloni before retrying`**
+A network failure with Moloni, which has no duplicate protection. Search Moloni for a document for
+the order; if there is none, press **Retry**. If there is one, it can't be linked back; leave the
+row as is.
 
 **`VAT mismatch: pretix charged X% on this order but the configured Fact.pt rate is Y%`**
 pretix and Fact.pt disagree on the VAT rate, and the invoice would be for the wrong amount. Either fix
@@ -103,12 +119,25 @@ Fact.pt has several clients with the buyer's NIF, and the plugin won't guess whi
 Merge or delete the duplicates in Fact.pt's Backoffice, then retry.
 
 **`Could not reach Fact.pt: …` / `Could not reach Moloni: …`**
-The provider was down or unreachable. These aren't retried automatically — press **Retry** once it's
-back. With Moloni, first check in Moloni that no document was created for the order.
+The provider was down or unreachable. See the two retry messages above: Fact.pt retries by itself,
+Moloni waits for you to check.
+
+**`price: Trying to use an item having more than 2 decimal digits, in an incompatible series.`**
+The series tied to the Fact.pt API key has 2 decimal places. The plugin needs an 8-decimal series;
+assign one to the key in Fact.pt's Backoffice. See [Setting up Fact.pt](pt-invoicing/factpt.md#setting-up-factpt).
 
 **`Invalid response from Fact.pt (HTTP …)`**
 Often a production token used against the sandbox, or the other way round. Check **Use sandbox
 environment**.
+
+**`Moloni rejected the request.` followed by a list of fields**
+Moloni's validation errors, one per field. `document_set_id` or `document_set_wsat_id` *must be
+valid* means the chosen series doesn't fit: not of the right document type (credit notes need their
+own series), or not from the selected company. Pick the series again in the settings and retry.
+
+**`Moloni has N customers with tax number X. Merge them in Moloni, then retry.`**
+Several Moloni customers share the buyer's NIF, and the plugin won't guess which one to invoice.
+Merge them in Moloni, then press **Retry**.
 
 **`Moloni refused the credentials.`**
 Check the developer ID, client secret, username and password. They're checked live when you fill
@@ -118,7 +147,7 @@ them in: errors show under the Moloni settings.
 The Moloni connection is missing or expired, and no username/password is set to fall back on. Press
 **Connect to Moloni** (or **Reconnect**) in the settings, then retry. The plugin refreshes the
 connection daily, so this usually means Moloni revoked it. See
-[Connecting to Moloni](pt-invoicing/moloni.md#connecting-to-moloni).
+[The connection](pt-invoicing/moloni.md#the-connection).
 
 **`VAT mismatch: pretix charged X% on this order but the configured Moloni rate is Y%`**
 Same as for Fact.pt: fix the event's tax rule, or pick the matching **VAT rate**. Nothing was created
@@ -133,8 +162,22 @@ fields, the line under the provider's settings shows why (bad token, provider un
 
 **The invoice was made out to a final consumer, but the buyer gave a NIF.**
 pretix only asks business customers for a VAT ID. Collect it from everyone with a custom invoice-address
-field — see [Tax numbers (NIF)](pt-invoicing/configuration.md#tax-numbers-nif). NIFs that fail the
-Portuguese check digit are ignored.
+field; see [Tax numbers (NIF)](pt-invoicing/configuration.md#tax-numbers-nif). NIFs that fail the
+Portuguese check digit are ignored (spaces, dots and a `PT` prefix are fine).
+
+**Portuguese business buyers can't complete checkout.**
+pretix's **Require VAT ID** is on while the custom field holds the NIF, which hides pretix's VAT ID
+field for Portuguese addresses. Turn the requirement off.
+
+**"The buyer changed their billing details after invoice … was issued."**
+Not an error: the buyer edited their invoice address after being invoiced, and the event's contact
+address got the same message by e-mail. An issued document can't be changed. To accept the new data,
+press **Issue credit note**, then **Issue invoice now**; to keep the document as is, ignore it. See
+[Billing changes after invoicing](pt-invoicing/configuration.md#billing-changes-after-invoicing).
+
+**The Moloni PDF shows a unit price of 34,99999 instead of 35,00.**
+Moloni stores unit prices to 5 decimals, and a tax-inclusive price divided by 1.23 never ends. The
+incidence, VAT and total are correct. See [Taxes](pt-invoicing/moloni.md#taxes).
 
 **An order was refunded, but no credit note was issued.**
 One is only issued automatically when:
@@ -152,4 +195,6 @@ A failed e-mail doesn't mark the issuance as failed; check the pretix log.
 
 **The PDF download returns "not found".**
 The document was issued by a different provider than the one currently selected, and the old
-provider's credentials aren't kept. Download it from that provider's back office.
+provider's credentials aren't kept. Download it from that provider's back office. On the buyer's
+side, the download also disappears when **Show the invoice on the buyer's order page** is off or the
+plugin is disabled for the event.

@@ -19,7 +19,7 @@ pretix_ptinvoicing/providers/acme/
 | `identifier` / `verbose_name` | Stored settings value and admin-facing label. |
 | `settings_form_class` | A pretix `SettingsForm`. Prefix field names by hand (`acme_api_key`) — pretix event settings are one flat namespace. |
 | `deduplicates_issuance` | `True` only if the API itself rejects a second document for the same `identifier_id`. |
-| `is_configured` | `False` while not set up; issuance then skips silently. |
+| `is_configured` | `False` while not set up; issuance then records an error row saying so. The base class derives `in_use` from it (selected as the event's provider *and* configured), which drives the settings page's "Not in use yet" notice. |
 | `issue(order, identifier_id)` | Issue the invoice-receipt; return an `IssuedDocument`. |
 | `credit(order, document_id, identifier_id)` | Issue a credit note for the full document. |
 | `download(document_id)` | Return the PDF bytes. Make sure they *are* a PDF — some APIs link to an HTML download page. |
@@ -162,12 +162,12 @@ class AcmeProvider(InvoiceProvider):
 
 ## Errors: rejection vs. transient
 
-The task decides what to do from the exception type alone:
+The task decides what to do from the exception type alone. `providers.base` defines both:
 
 | Raised | Meaning | Task behaviour |
 |---|---|---|
 | `ProviderError` | The provider refused the request | Marked *error*, shown to the admin, **not retried** |
-| anything else | Transient failure | Marked *error*, retried 3× (2 min apart) — only if `deduplicates_issuance` |
+| `ProviderUnreachable` (or anything else) | Transient failure: network error, timeout | Marked *error* and retried 3× (2 min apart) if `deduplicates_issuance`; otherwise left for a human, with a "check in the provider before retrying" message |
 
 Wrap API-level rejections in a `ProviderError` subclass, passing the per-field errors as `detail` so
 the Control panel shows them:
@@ -233,8 +233,9 @@ class AcmeClient:
 ```
 
 !!! note
-    The bundled Fact.pt and Moloni clients currently wrap network errors in `ProviderError` too, so
-    in practice their failures are never retried automatically — only by hand.
+    The bundled Fact.pt and Moloni clients raise `ProviderUnreachable` for `requests` failures.
+    Prefer it over a bare `requests` exception in yours too: anything that swallows lookup errors
+    (the settings page, the daily keepalive) catches both types, and nothing else.
 
 !!! danger "`deduplicates_issuance` and retries"
     If your API has no field it dedupes on, set `deduplicates_issuance = False`. A request that timed
